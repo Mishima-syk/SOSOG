@@ -31,21 +31,27 @@ bookmark_tag = db.Table('bookmark_tag',
 class Bookmark(db.Model):
     __tablename__ = 'bookmark'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key=True)
-    reference_id = db.Column(db.Integer, db.ForeignKey('reference.id'), primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    reference_id = db.Column(db.Integer, db.ForeignKey('reference.id'))
     description = db.Column(db.Text())
-    user = db.relationship('User', back_populates="users")
-    reference = db.relationship("Reference", back_populates="references")
+    user = db.relationship('User', back_populates="references")
+    reference = db.relationship("Reference", back_populates="users")
     tags = db.relationship("Tag", secondary=bookmark_tag)
 
 
 class User(db.Model):
     __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
-    email = db.Column(db.String, primary_key=True)
+    name = db.Column(db.String, unique=True)
+    email = db.Column(db.String, unique=True)
     password = db.Column(db.String)
     authenticated = db.Column(db.Boolean, default=False)
     references = db.relationship("Bookmark", back_populates="user")
+
+    def __init__(self, name, email, password):
+        self.name = name
+        self.email = email
+        self.password = password
 
     def is_active(self):
         """True, as all users are active."""
