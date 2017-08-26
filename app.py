@@ -33,10 +33,13 @@ class Bookmark(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     reference_id = db.Column(db.Integer, db.ForeignKey('reference.id'))
-    description = db.Column(db.Text())
-    user = db.relationship('User', back_populates="references")
+    comment = db.Column(db.Text())
     reference = db.relationship("Reference", back_populates="users")
+    user = db.relationship('User', back_populates="references")
     tags = db.relationship("Tag", secondary=bookmark_tag)
+
+    def __init__(self, comment):
+        self.comment = comment
 
 
 class User(db.Model):
@@ -74,12 +77,19 @@ class Reference(db.Model):
     __tablename__ = 'reference'
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(256), unique=True)
-    description = db.Column(db.Text())
+    abstract = db.Column(db.Text())
     pubmed_id = db.Column(db.String(10))
     doi = db.Column(db.String(256))
     arxiv_id = db.Column(db.String(256))
-    usercount = db.Column(db.Integer)
+    usercount = db.Column(db.Integer, default=0)
     users = db.relationship("Bookmark", back_populates="reference")
+
+    def __init__(self, **k):
+        self.title = k.get("title", "Title not found")
+        self.abstract = k.get("abstract", "abstract not found")
+        self.pubmed_id = k.get("pubmed_id", None)
+        self.doi = k.get("doi", None)
+        self.arxiv_id = k.get("arxiv_id", None)
 
 
 class Tag(db.Model):
