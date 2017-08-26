@@ -3,7 +3,7 @@ import sys
 import unittest
 rootdir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 sys.path.insert(0, rootdir)
-from app import db, User, Bookmark, Reference
+from app import db, User, Bookmark, Reference, Tag
 
 
 class TestUser(unittest.TestCase):
@@ -51,7 +51,7 @@ class TestBookmark(unittest.TestCase):
     def tearDown(self):
         User.query.delete()
         Reference.query.delete()
-        #Bookmark.query.delete()
+        Bookmark.query.delete()
         db.session.commit()
 
     def test_bookmark(self):
@@ -69,13 +69,13 @@ class TestBookmark(unittest.TestCase):
                         doi=doi)
         db.session.add(ref)
         db.session.commit()
-        
+
         bookmark = Bookmark(comment="TOPII ref")
         bookmark.reference = ref
         bookmark.user = u
         db.session.add(bookmark)
         db.session.commit()
-        
+
         self.assertEqual(len(u.references), 1)
         title2 = "another ref"
         abstract2 = "abstract"
@@ -105,3 +105,65 @@ class TestBookmark(unittest.TestCase):
         self.assertEqual(u2.references[0].comment, "another comment")
         self.assertEqual(len(ref.users), 1)
         self.assertEqual(len(ref2.users), 2)
+
+
+class TestNewTag(unittest.TestCase):
+
+    def tearDown(self):
+        Tag.query.delete()
+        db.session.commit()
+
+    def test_new_tag(self):
+        t = Tag("TOP2")
+        db.session.add(t)
+        db.session.commit()
+        self.assertEqual(t.name, "TOP2")
+
+
+class TestTagRelationship(unittest.TestCase):
+
+    def setUp(self):
+        u = User("testuser", "test@example.com", "test1234")
+        db.session.add(u)
+        self.u = u
+        title = "Overexpression of Topoisomerase 2-Alpha Confers a Poor Prognosis in Pancreatic Adenocarcinoma Identified by Co-Expression Analysis."
+        abstract = "abstract"
+        pubmed_id = "28815403"
+        doi = "10.1007/s10620-017-4718-4"
+        ref = Reference(title=title,
+                        abstract=abstract,
+                        pubmed_id=pubmed_id,
+                        doi=doi)
+        db.session.add(ref)
+        db.session.commit()
+        self.r = ref
+
+        bookmark = Bookmark(comment="TOPII ref")
+        bookmark.reference = ref
+        bookmark.user = u
+        db.session.add(bookmark)
+        db.session.commit()
+        self.b = bookmark
+
+    def tearDown(self):
+        User.query.delete()
+        Reference.query.delete()
+        Bookmark.query.delete()
+        Bookmark.query.delete()
+        Tag.query.delete()
+        db.session.commit()
+
+    def test_add_tag(self):
+        self.assertEqual(len(self.b.tags), 0)
+        t = Tag("TOP2")
+        db.session.add(t)
+        db.session.commit()
+        t2 = Tag("Cancer")
+        db.session.add(t2)
+        db.session.commit()
+        self.b.tags.append(t)
+        db.session.commit()
+        self.assertEqual(len(self.b.tags), 1)
+        self.b.tags.append(t2)
+        db.session.commit()
+        self.assertEqual(len(self.b.tags), 2)

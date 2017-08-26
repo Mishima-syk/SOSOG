@@ -34,6 +34,8 @@ class Bookmark(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
     reference_id = db.Column(db.Integer, db.ForeignKey('reference.id'))
     comment = db.Column(db.Text())
+    unread = db.Column(db.Boolean)
+    star = db.Column(db.Boolean)
     reference = db.relationship("Reference", back_populates="users")
     user = db.relationship('User', back_populates="references")
     tags = db.relationship("Tag", secondary=bookmark_tag)
@@ -81,7 +83,7 @@ class Reference(db.Model):
     pubmed_id = db.Column(db.String(10))
     doi = db.Column(db.String(256))
     arxiv_id = db.Column(db.String(256))
-    usercount = db.Column(db.Integer, default=0)
+    starcount = db.Column(db.Integer, default=0)
     users = db.relationship("Bookmark", back_populates="reference")
 
     def __init__(self, **k):
