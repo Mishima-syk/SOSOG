@@ -76,7 +76,7 @@ class TestBookmark(unittest.TestCase):
         db.session.add(bookmark)
         db.session.commit()
 
-        self.assertEqual(len(u.references), 1)
+        self.assertEqual(len(u.bookmarks), 1)
         title2 = "another ref"
         abstract2 = "abstract"
         pubmed_id2 = "28815404"
@@ -92,19 +92,19 @@ class TestBookmark(unittest.TestCase):
         bookmark2.reference = ref2
         db.session.add(bookmark2)
         db.session.commit()
-        self.assertEqual(len(u.references), 2)
-        self.assertEqual(u.references[0].comment, "TOPII ref")
-        self.assertEqual(u.references[1].comment, "another ref")
+        self.assertEqual(len(u.bookmarks), 2)
+        self.assertEqual(u.bookmarks[0].comment, "TOPII ref")
+        self.assertEqual(u.bookmarks[1].comment, "another ref")
 
         bookmark3 = Bookmark(comment="another comment")
         bookmark3.user = u2
         bookmark3.reference = ref2
         db.session.add(bookmark3)
         db.session.commit()
-        self.assertEqual(len(u2.references), 1)
-        self.assertEqual(u2.references[0].comment, "another comment")
-        self.assertEqual(len(ref.users), 1)
-        self.assertEqual(len(ref2.users), 2)
+        self.assertEqual(len(u2.bookmarks), 1)
+        self.assertEqual(u2.bookmarks[0].comment, "another comment")
+        self.assertEqual(len(ref.bookmarks), 1)
+        self.assertEqual(len(ref2.bookmarks), 2)
 
 
 class TestNewTag(unittest.TestCase):
